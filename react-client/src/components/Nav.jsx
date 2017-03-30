@@ -37,7 +37,8 @@ class Nav extends React.Component {
 								          </select>    					
 					    				</a>
 				    				</li>
-				    				<input type="submit" value="Search Businesses" className="btn btn-warning search"/>    				
+				    				<a className="loginFacebook" href="/auth/facebook">Login with Facebook</a>				
+				    				<input type="submit" value="Search Businesses" className="btn btn-warning search"/>   
 				  			</ul>
 				    </form>
 	  			</div>

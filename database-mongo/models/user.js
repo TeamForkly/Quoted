@@ -5,12 +5,17 @@ var Promise = require('bluebird');
 
 //User Table Schema
 var userSchema = mongoose.Schema({
-  username: { type: String, unique: true },
+  name: String,
   password: String,
   requests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Requests'}]
   // name: String,
   // userCellPhone: String,
   // userEmail: String,
+  // username: { type: String, unique: true },
+  // password: String,
+  // userEmail: String,
+  facebook: Object,
+  // userCellPhone: String,
   // salt: String,
   // userAddress: String,
   // userCity: String,
@@ -18,27 +23,27 @@ var userSchema = mongoose.Schema({
 });
 
 //Middleware to hash password
-userSchema.pre('save', function(next) {
-  var cipher = Promise.promisify(bcrypt.hash);
-  return cipher(this.password, null, null).bind(this)
-    .then(function(hash) {
-      this.password = hash;
-      next();
-    });
-});
+// userSchema.pre('save', function(next) {
+//   var cipher = Promise.promisify(bcrypt.hash);
+//   return cipher(this.password, null, null).bind(this)
+//     .then(function(hash) {
+//       this.password = hash;
+//       next();
+//     });
+// });
 
 //Users Collection
-var Users = mongoose.model('Users', userSchema);
+var User = mongoose.model('User', userSchema);
 
 //Method to comparePassword in database against submitted password
-Users.comparePassword = function(attemptedPassword, savedPassword, callback) {
-  bcrypt.compare(attemptedPassword, savedPassword, function(err, isMatch) {
-    if (err) {
-      return callback(err);
-    } else {
-      callback(null, isMatch);
-    }
-  });
-};
+// Users.comparePassword = function(attemptedPassword, savedPassword, callback) {
+//   bcrypt.compare(attemptedPassword, savedPassword, function(err, isMatch) {
+//     if (err) {
+//       return callback(err);
+//     } else {
+//       callback(null, isMatch);
+//     }
+//   });
+// };
 
-module.exports = Users;
+module.exports = User;
