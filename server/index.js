@@ -4,8 +4,8 @@ var bodyParser = require('body-parser');
 var db = require('../database-mongo/index.js');
 var User = require('../database-mongo/models/user.js');
 var handler = require('./request-handler');
-var cookieParser = require('cookie-parser');
-var session = require('express-session');
+// var cookieParser = require('cookie-parser');
+// var session = require('express-session');
 var facebook = require('./facebook.js');
 var passport = require('passport');
 var path = require('path');
@@ -15,22 +15,19 @@ var http = require('http');
 loadExampleData();
 
 var app = express();
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.static(__dirname + '/../react-client/dist'));
 
 
-app.use(session({
-  secret: 'Greenfie1dBr0s',
-  resave: true,
-  saveUninitialized: true
-}));
+app.use(express.session({secret: 'Greenfie1dBr0s'}));
 
-app.use(cookieParser('Greenfie1dBr0s'));
+app.use(express.cookieParser());
 
  app.use(passport.initialize());
- app.use(session());
+ app.use(express.session());
 
 
 // facebook passport

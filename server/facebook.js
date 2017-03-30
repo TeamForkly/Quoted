@@ -3,7 +3,7 @@ var db = require('../database-mongo/index.js');
 var User = require('../database-mongo/models/user.js');
 var configAuth = require('./auth.js');
 
-var passport = require('passport')
+const passport = require('passport')
   , FacebookStrategy = require('passport-facebook').Strategy;
 
 
@@ -14,9 +14,9 @@ passport.use(new FacebookStrategy({
     callbackURL: configAuth.facebookAuth.callbackURL
   },
    function(accessToken, refreshToken, profile, done) {
-      // console.log('profile: ', profile);
-      // console.log('accessToken', accessToken);
-      // console.log('refreshToken', refreshToken);
+      console.log('profile: ', profile);
+      console.log('accessToken', accessToken);
+      console.log('refreshToken', refreshToken);
        //check user table for anyone with a facebook ID of profile.id
        User.findOne({
            'facebook.id': profile.id
