@@ -1,7 +1,7 @@
 var express = require('express');
 var db = require('../database-mongo/index.js');
 var User = require('../database-mongo/models/user.js');
-var configAuth = require('./auth.js');
+// var configAuth = require('./auth.js');
 
 const passport = require('passport')
   , FacebookStrategy = require('passport-facebook').Strategy;
@@ -9,9 +9,9 @@ const passport = require('passport')
 
 // Use facebook strategy
 passport.use(new FacebookStrategy({
-    clientID: configAuth.facebookAuth.clientID,
-    clientSecret: configAuth.facebookAuth.clientSecret,
-    callbackURL: configAuth.facebookAuth.callbackURL
+    clientID: process.env.FB_appID,
+    clientSecret: process.env.FB_secret,
+    callbackURL: process.env.SITE_URL + 'auth/facebook/callback/'
   },
    function(accessToken, refreshToken, profile, done) {
       // console.log('profile: ', profile);

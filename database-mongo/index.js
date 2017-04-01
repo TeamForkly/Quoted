@@ -1,8 +1,8 @@
 var mongoose = require('mongoose');
 
-var mongoUrl = 'mongodb://localhost/quoted';
+// var mongoUrl = 'mongodb://localhost/quoted';
 
-mongoose.connect(mongoUrl);
+mongoose.connect(process.env.MONGODB_URI);
 
 var db = mongoose.connection;
 
