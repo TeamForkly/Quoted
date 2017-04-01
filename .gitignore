@@ -16,3 +16,6 @@ uploads
 
 #OSX specific
 .DS_Store
+
+#Ignored for production
+*.env

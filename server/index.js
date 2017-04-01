@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 var db = require('../database-mongo/index.js');
 var User = require('../database-mongo/models/user.js');
 var handler = require('./request-handler');
+require('dotenv').config()
 // var cookieParser = require('cookie-parser');
 // var session = require('express-session');
 var facebook = require('./facebook.js');

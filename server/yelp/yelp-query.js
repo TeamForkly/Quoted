@@ -9,10 +9,10 @@ var contactsdb = require('../../database-mongo/models/contacts.js')
 var Promise = require('bluebird');
 
 var yelp = new Yelp({
-  consumer_key: yelpApi.consumerKey,
-  consumer_secret: yelpApi.consumerSecret,
-  token: yelpApi.token,
-  token_secret: yelpApi.tokenSecret
+  consumer_key: process.env.YELP_consumerKey,
+  consumer_secret: process.env.YELP_consumerSecret,
+  token: process.env.YELP_token,
+  token_secret: process.env.YELP_tokenSecret
 });
 
 yelp.queryApi = function(obj) {
