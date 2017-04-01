@@ -1,4 +1,5 @@
-var setup = require('./auth.js');
+require('../config/config.js');
+// var setup = require('./auth.js');
 var express = require('express');
 var bodyParser = require('body-parser');
 var db = require('../database-mongo/index.js');
@@ -8,7 +9,6 @@ var handler = require('./request-handler');
 // var session = require('express-session');
 var facebook = require('./facebook.js');
 var passport = require('passport');
-var path = require('path');
 var s3Router = require('./s3Router');
 var loadExampleData = require('./loadExampleData').loadExampleData;
 var multer = require('multer');
@@ -148,11 +148,11 @@ app.post('/', handler.receiveText);
 
 app.post('/call', handler.callBusinesses)  
 app.post('/voice', handler.setVoiceMessage);
-
+let port = process.env.PORT || 3000;
 //Deployment ports
-app.set('port', (3000));
+app.set('port', (port));
 
-app.listen(app.get('port'), function() {
-  console.log('listening on on port:' + app.get('port'));
+app.listen(port, function() {
+  console.log('listening on on port:' + port);
 });
 
