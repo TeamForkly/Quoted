@@ -10,11 +10,6 @@ class Message extends React.Component {
 
   }
 
-  // handleChange(e) {
-  //   this.setState({input: e.target.value});
-  //   console.log(e.target.value);
-  // }
-
   render() {
     return (            
       <div className="form-group message">

@@ -16,7 +16,7 @@ class App extends React.Component {
     super(props);
     this.state = { 
       businesses: [],
-      groupName: 'Auto Repair',
+      groupName: 'HRSF72',
       location: 'San Francisco',
       sendSMS: false,
       sendPhone: false,
