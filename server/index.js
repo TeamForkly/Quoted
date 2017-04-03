@@ -41,10 +41,16 @@ app.get('/auth/facebook/callback',
 app.post('/user/addcontacts', upload.single('file'), handler.userAddcontacts);
 app.post('/businesses', handler.checkBusinessData);
 
+// put contacts in db
+app.post('/db/contacts', handler.addContactsToDB);
+
+// get groupnames from db
+app.get('/groupNames', handler.getGroupNames);
+
 // SMS
 app.post('/messages', handler.textBusinesses);
 app.post('/sms', handler.receiveText);
-app.post('/createNewThread/group/:groupName', handler.createNewThread);
+// app.post('/createNewThread/group/:groupName', handler.createNewThread);
 
 app.get('/findText/:number', handler.findResponsesFromContactNumber);
 
@@ -52,9 +58,11 @@ app.post('/call', handler.callBusinesses)
 app.post('/voice', handler.setVoiceMessage);
 
 // get request handler for threads
-app.get('/threads', (req, res) => {
-  res.send(threadsExampleData);
-});
+app.get('/threads', handler.fetchThreads);
+// app.get('/threads', (req, res) => {
+//   res.send(threadsExampleData);
+// });
+
 
 let port = process.env.PORT || 3000;
 

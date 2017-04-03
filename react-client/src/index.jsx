@@ -22,6 +22,8 @@ class App extends React.Component {
       sendPhone: false,
       textInput: '',
       recordingPublicUrl: '',
+      groupNames: [],
+      threads: []
     }
   }
 
@@ -33,8 +35,14 @@ class App extends React.Component {
     this.setState({location: event.target.value});
   }
 
-
-
+  fetchGroupNames() {
+    let context = this;
+    $.get('/groupNames', {}, (data) => {
+      context.setState({
+        groupNames: data
+      });
+    });
+  }
 
   // sendInfo() {
   //   console.log('Trying to send info', this.state.textInput);
@@ -101,6 +109,7 @@ class App extends React.Component {
 
   componentDidMount() {
     this.fetchBusinesses();
+    this.fetchGroupNames();
   }
 
   render() {
@@ -124,7 +133,12 @@ class App extends React.Component {
           )
         }}/>
         <Route path="/threads" component={Threads}/>
-        <Route path="/fileUpload" component={FileUpload}/>
+        <Route path="/fileUpload" component={() => {
+          return(
+            <FileUpload groupNames={this.state.groupNames} fetchGroupNames={this.fetchGroupNames.bind(this)}/>
+          )
+        }
+        }/>
       </div>
     </HashRouter>
     )

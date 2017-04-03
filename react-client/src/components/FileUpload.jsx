@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import DropzoneComponent from 'react-dropzone-component';
+import $ from 'jquery';
 
 class FileUpload extends React.Component {
   constructor(props) {
@@ -56,6 +57,20 @@ class FileUpload extends React.Component {
   clickHandler() {
     console.log('clicked');
     console.log(this.state);
+    let FileUploadContext = this;
+    if (this.state.contacts.length && this.state.groupName) {
+      $.post({
+        url: '/db/contacts',
+        data: this.state,
+        success: (results) => {
+          FileUploadContext.props.fetchGroupNames();
+        },
+        error: (err) => {
+
+        } 
+
+      })      
+    }
   }
 
   render() {

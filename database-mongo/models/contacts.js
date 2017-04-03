@@ -1,8 +1,9 @@
 var db = require('../index.js');
 var mongoose = require('mongoose');
+mongoose.Promise = require('bluebird');
 
 var contactsSchema = mongoose.Schema({
-  contactName: {type: String, unique: true },
+  contactName: {type: String, unique: true},
   contactPhoneNumber: Number,
   businessType: [String], //Changed from Array
   businessCity: String,
