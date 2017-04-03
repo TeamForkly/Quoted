@@ -8,8 +8,7 @@ class Threads extends React.Component {
     super(props);
     this.state = {
       threads: []
-    }
-    this.fetchThreads();
+    } 
   }
 
   fetchThreads() {
@@ -23,17 +22,27 @@ class Threads extends React.Component {
 
   }
 
+  componentDidMount() {
+    this.fetchThreads();
+  }
+
   render() {
-    return (  
-      <div className="threads">
-        {
-          this.state.threads.map((thread) => {
-            console.log('thread: ', thread);
-            return <Thread thread={thread} key={thread._id}/>
-          })
-        }
-      </div>
-    )
+    if (this.state.threads.length) {
+      return (  
+        <div className="threads">
+          {
+            this.state.threads.map((thread) => {
+              console.log('thread: ', thread);
+              return <Thread thread={thread} key={thread._id}/>
+            })
+          }
+        </div>
+      )      
+    } else {
+      return (
+        <div>Please login to see threads</div>
+      )
+    }
 
   }
 }

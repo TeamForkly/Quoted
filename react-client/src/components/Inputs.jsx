@@ -20,7 +20,7 @@ class Inputs extends React.Component {
 
   handleTextInputChange(event) {
     this.setState({textInput: event.target.value});
-    console.log(this.state.textInput);
+    // console.log(this.state.textInput);
   }
 
   handleCheckBox(event) {
@@ -42,7 +42,7 @@ class Inputs extends React.Component {
     // console.log('groups: ', this.props.state.businesses);
 
     //Send data to server to send text messages
-    if (this.state.sendSMS === true){
+    // if (this.state.sendSMS === true){
       $.ajax({
         method: "POST",
         url: '/messages',
@@ -58,7 +58,7 @@ class Inputs extends React.Component {
           console.log('err recieved', err);
         }
       })
-    }
+    // }
 
     //Send data to server to send phone calls
     if (this.state.sendPhone === true) {

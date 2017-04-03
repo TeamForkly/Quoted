@@ -77,24 +77,39 @@ class FileUpload extends React.Component {
   clickHandler() {
     console.log('clicked');
     console.log(this.state);
-    var groupName = this.state.groupName;
-    var contacts = this.state.contacts;
-    $.ajax({
-      url:'createNewGroup/group/:' + groupName,
-      method: 'POST',
-      data: {
-        contacts: contacts
-      },
-      dataType: 'application/json',
-      success: (data) =>{
-        console.log('successfully returned from server!');
-        console.log(data);
+    let FileUploadContext = this;
+    if (this.state.contacts.length && this.state.groupName) {
+      $.post({
+        url: '/db/contacts',
+        data: this.state,
+        success: (results) => {
+          FileUploadContext.props.fetchGroupNames();
+        },
+        error: (err) => {
 
-      },
-      fail: (err) => {
-        throw err;
-      }
-    });
+        } 
+
+      })      
+    }
+    
+//     var groupName = this.state.groupName;
+//     var contacts = this.state.contacts;
+//     $.ajax({
+//       url:'createNewGroup/group/:' + groupName,
+//       method: 'POST',
+//       data: {
+//         contacts: contacts
+//       },
+//       dataType: 'application/json',
+//       success: (data) =>{
+//         console.log('successfully returned from server!');
+//         console.log(data);
+
+//       },
+//       fail: (err) => {
+//         throw err;
+//       }
+//     });
   }
 
   render() {

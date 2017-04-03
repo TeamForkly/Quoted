@@ -8,6 +8,7 @@ var Users = require('../database-mongo/models/user.js');
 var responsesdb = require('../database-mongo/models/responses.js');
 var threadsdb = require('../database-mongo/models/threads.js');
 
+
 //Yelp
 var yelp = require('./yelp/yelp-query.js');
 
@@ -29,36 +30,56 @@ exports.checkBusinessData = function(req, res) {
   console.log('REQ USER IS', req.user);
   var category = req.body.category;
   var location = req.body.location;
-  
+
   //currently not being used
   // var term = req.body.term;
   // var geolocationLat = req.body.geolocationLat;
   // var geolocationLong = req.body.geolocationLong;  
 
-  contactsdb.Contacts.find({"businessType": category, "businessCity": location})
+  contactsdb.Contacts.find({"businessType": category})
     .exec(function(err, result) {
       if (err) {
           res.status(500).send("Something unexpected and horrendeous happened");  
       } else {
-        if(result.length <= 2) {
-          yelp.queryApi({ 'term': category, 'location': location })
-          .then((results) => {
-            // console.log('results.businesses', results.businesses);
-            res.json(results.businesses);
-          });
-        } else {            
-          // console.log('yelp query results: ', result);
-          res.json(result); 
-        }
+        // if(result.length <= 2) {
+        //   yelp.queryApi({ 'term': category, 'location': location })
+        //   .then((results) => {
+        //     // console.log('results.businesses', results.businesses);
+        //     res.json(results.businesses);
+        //   });
+        // } else {            
+        //   // console.log('yelp query results: ', result);
+        // }
+        res.json(result); 
       }
     });
 };
+
+let createNewThread = function(body, callback) {
+  console.log('Creating new thread');
+  Threads.create({
+    outboundMsg: body.textInput,
+    groupName: body.groupName,
+    contacts: body.businesses
+  }, function(err, data) {
+    if (err) {
+      callback(err, null);
+    } else {
+      console.log('data', data);
+      callback(null, data);
+    }
+  });
+}
 
 exports.textBusinesses = function(req, res) {
   // console.log('getting response from client'); 
   // console.log('req body', req.body);
   var textInput = req.body.textInput
+  
   // console.log('textInput', textInput);
+  // console.log('req.user: ', req.user);
+  // console.log('req.body: ', req.body);
+  
   // if we are just getting an array from the client then we don't need to do the Business.find
   // we'd just start on the forEach loop
   // var businessType = "test" // req.body.businesstype
@@ -68,29 +89,48 @@ exports.textBusinesses = function(req, res) {
   var businessType = req.body.groupName;
   var location = req.body.location;
 
-  contactsdb.Contacts.find({businessType: businessType, businessCity: location}, function(err, businesses){
-    if (err) {
-      console.log(err);
-    } else {
-      // console.log('test businesses', businesses);
-      businesses.forEach(function(biz) {
-        client.messages.create({
-          to: biz.contactPhoneNumber,
-          from: phoneNumber,
-          body: 'Hey ' + biz.contactName +  '! ' + textInput
-        }, function (err, message) {
-          if (err) {
-            console.log('err', err);
-            res.status(404).end();
-          } else {
-            // console.log('sent message!!!!!');
-            // console.log('message sid', message.sid);
-            res.status(200).send();
-          }
-        });
-      });
-    }
-  }); // possibly limit here if we're still quering from db!
+  // create new thread
+  if (req.user) {
+    return threadsdb.Threads.create({
+      outboundMsg: req.body.textInput,
+      groupName: req.body.groupName,
+      contacts: req.body.businesses
+    })
+    .then((thread) => {
+      // console.log(thread);
+      return Users.findByIdAndUpdate(req.user._id, {$push: {threads: thread.id}});
+    })
+    .then(() => {
+      // res.end();    
+      contactsdb.Contacts.find({businessType: businessType}, function(err, businesses){
+        if (err) {
+          console.log(err);
+        } else {
+          // console.log('test businesses', businesses);
+          businesses.forEach(function(biz) {
+            client.messages.create({
+              to: biz.contactPhoneNumber,
+              from: phoneNumber,
+              body: 'Hey ' + biz.contactName +  '! ' + textInput
+            }, function (err, message) {
+              if (err) {
+                console.log('err', err);
+                res.status(404).end();
+              } else {
+                console.log('sent message!!!!!');
+                // console.log('message sid', message.sid);
+                res.status(200).send();
+              }
+            });
+          });
+        }
+      }); // possibly limit here if we're still quering from db!
+    })
+
+  } else {
+    res.end();
+  }
+
 };
 
 /* NGROK
@@ -106,25 +146,76 @@ overall: You need to run ngrok and expose your port to the public
 
 // webhook for SMS response
 exports.receiveText = function(req, res) {
-  console.log('RECEIVED TEXT', req.body);
+  // console.log('RECEIVED TEXT', req.body);
   var inboundMsg = req.body.Body;
   var fromNumber = req.body.From;
   // to take out the leading '+1' for US. for example, +14085603553 will now be saved as 4085603553
   fromNumber = Number(req.body.From.slice(2)); 
 
   // var twilio = require('twilio');
-  responsesdb.createResponse(fromNumber, inboundMsg, function(err, data) {
-    // console.log('GOT THE NUMBER!', fromNumber);
-    // console.log('GOT THE MSG!', inboundMsg);
-    if (err) {
-      res.status(500).send(err);
-      return;
-    } else {
-      twiml.message('From Forkly: Thanks for your text!');
-      res.writeHead(200, {'Content-Type': 'text/xml'});
-      res.end(twiml.toString());
-    }
-  });
+  let response = {
+    fromNumber: fromNumber,
+    inboundMsg: inboundMsg
+  };
+
+  if (req.user) {
+    return Users.findById(req.user._id)
+    .then((user) => {
+      return user.threads[threads.length - 1];
+    })
+    .then((threadId) => {
+      // return Users.findByIdAndUpdate(req.user._id, {$push: {threads: thread.id}});
+      return threadsdb.Threads.findByIdAndUpdate(threadId, {$push: {responses: response}});
+    })
+    .then(() => {
+      res.end();
+      // if (err) {
+      //   res.status(500).send(err);
+      //   return;
+      // } else {
+      //   twiml.message('From Forkly: Thanks for your text!');
+      //   res.writeHead(200, {'Content-Type': 'text/xml'});
+      //   res.end(twiml.toString());
+      // }
+    });
+
+  // if (req.user) {
+  //   return responsesdb.Responses.create({
+  //     fromNumber: fromNumber,
+  //     inboundMsg: inboundMsg
+  //   })
+  //   .then((response) => {
+  //     response = response;
+  //     return Users.findById(req.user._id);
+  //   })
+  //   .then((user) => {
+  //     return user.threads[threads.length - 1];
+  //   })
+  //   .then((threadId) => {
+  //     // return Users.findByIdAndUpdate(req.user._id, {$push: {threads: thread.id}});
+  //     return threadsdb.Threads.findByIdAndUpdate(threadId, {$push: {responses: response}});
+  //   })
+  //   .then(() => {
+  //     res.end();      
+  //   });
+
+
+  } else {
+    res.end();
+  }
+
+  // responsesdb.createResponse(fromNumber, inboundMsg, function(err, data) {
+  //   // console.log('GOT THE NUMBER!', fromNumber);
+  //   // console.log('GOT THE MSG!', inboundMsg);
+  //   if (err) {
+  //     res.status(500).send(err);
+  //     return;
+  //   } else {
+  //     twiml.message('From Forkly: Thanks for your text!');
+  //     res.writeHead(200, {'Content-Type': 'text/xml'});
+  //     res.end(twiml.toString());
+  //   }
+  // });
 };
 
 // finding texts in db from specific user 
@@ -141,22 +232,22 @@ exports.findResponsesFromContactNumber = function(req, res) {
   });
 };
 
-exports.createNewThread = function(req, res) {
-  let groupName = req.params.groupName;
-  // let outboundMsg = req.params.outboundMsg;
-  let query = req.query;
-  // console.log(outboundMsg);
-  console.log(query);
+// exports.createNewThread = function(req, res) {
+//   let groupName = req.params.groupName;
+//   // let outboundMsg = req.params.outboundMsg;
+//   let query = req.query;
+//   // console.log(outboundMsg);
+//   console.log(query);
   
-  threadsdb.createNewThread(groupName, function(err, data) {
-    if (err) {
-      res.status(500).send(err);
-      return;
-    } else {
-      res.send(groupName);
-    }
-  });
-};
+//   threadsdb.createNewThread(groupName, function(err, data) {
+//     if (err) {
+//       res.status(500).send(err);
+//       return;
+//     } else {
+//       res.send(groupName);
+//     }
+//   });
+// };
 
 exports.callBusinesses = function(req, res) {
 
@@ -250,18 +341,66 @@ exports.userAddcontacts = function(req, res) {
 
 };
 
-exports.createNewGroup = function(req, res) {
-  let groupName = req.params.groupName.slice(1);
-  var contacts = req.body.contacts;
-  console.log('groupName', groupName);
-  // console.log('contacts', contacts);
-  contacts.forEach(contact => {
-    console.log(contact, groupName);
-    contactsdb.addContact(contact[0], contact[1], [groupName]);
+// Add contacts into db
+exports.addContactsToDB = function(req, res) {
+  // console.log('contacts req.body: ', req.body);
+  let contacts = req.body.contacts.map((contact) => {
+    return {
+      contactName: contact[0],
+      contactPhoneNumber: contact[1],
+      businessType: req.body.groupName
+    }
   });
 
-  res.json('hit server!');
-};
+  // console.log('contacts to be put into db: ', contacts)
+  
+
+  let contactsPromises = contacts.map((contact) => {
+    // console.log('contact: ', contact);
+    return contactsdb.Contacts.create(contact);
+  });
+
+  Promise.all(contactsPromises)
+  .then(() => {
+    // console.log('finished promises');
+    res.end()
+  });
+}
+
+exports.getGroupNames = function(req, res) {
+  contactsdb.Contacts.distinct('businessType').then((groupNames) => {
+    // console.log(groupNames);
+    res.send(groupNames);
+  });
+}
+
+exports.fetchThreads = function(req, res) {
+  if (req.user) {
+    Users.findById(req.user._id)
+    .populate('threads')
+    .then((users) => {
+      // console.log('THIS threads: ', users.threads);
+      res.send(users.threads);
+    })
+    // .exec(function(err, threads) {
+    //   res.send(threads);
+    // });
+  } else {
+    res.end();
+  }
+}
+// exports.createNewGroup = function(req, res) {
+//   let groupName = req.params.groupName.slice(1);
+//   var contacts = req.body.contacts;
+//   console.log('groupName', groupName);
+//   // console.log('contacts', contacts);
+//   contacts.forEach(contact => {
+//     console.log(contact, groupName);
+//     contactsdb.addContact(contact[0], contact[1], [groupName]);
+//   });
+
+//   res.json('hit server!');
+// };
 
 
 // COMMENTS FROM GREENFIELD BROS: 

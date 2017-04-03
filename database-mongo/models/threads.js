@@ -7,18 +7,19 @@ var Schema = mongoose.Schema;
 var threadsSchema = new Schema({
   outboundMsg: String,
   groupName: String,
-  contacts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Contacts'}], 
-  // contacts: Array, // Currently saved as an array of arrays: [[name, number], [name, number]] 
-  responses: Array // of objects that looks like: {fromNumber: Number, inboundMsg: String,}
+  // contacts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Contacts'}],
+  contacts: Array,
+  responses: Array // of objects: {fromNumber: Number, inboundMsg: String,}
 });
 
 var Threads = mongoose.model('Threads', threadsSchema);
 
-var createNewThread = function(groupName, callback) {
+var createNewThread = function(body, callback) {
   console.log('Creating new thread');
   Threads.create({
-    // outboundMsg: outboundMsg,
-    groupName: groupName
+    outboundMsg: body.textInput,
+    groupName: body.groupName,
+    contacts: body.businesses
   }, function(err, data) {
     if (err) {
       callback(err, null);
