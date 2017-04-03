@@ -66,6 +66,9 @@ app.get('/threads', handler.fetchThreads);
 
 let port = process.env.PORT || 3000;
 
+// save to db
+app.post('/createNewGroup/group/:groupName', handler.createNewGroup);
+
 //Deployment ports
 // app.set('port', (port));
 

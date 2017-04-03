@@ -17,6 +17,25 @@ class Nav extends React.Component {
   // }
 
   render() {
+//     <nav className="navbar navbar-default"> 
+// 		<div className="container-fluid">
+//   	<div>
+//   		<button><Link to="/">Home</Link></button>
+//   		<button><Link to="/threads">Past Threads</Link></button>
+//   		<button><Link to="/fileUpload">Create Contact Groups</Link></button>
+//   	</div>
+// 		  <form onSubmit={this.props.fetchBusinesses}>
+//     		<ul className="nav navbar-nav">
+// 			  <li className="dropdown">
+// 				<a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+// 					<label> Contact Group: </label> {' '}
+// 		 			<select value={this.props.searchParams.groupName} onChange={this.props.handleGroupNameChange}>
+// 		            <option value="Auto Repair">Auto Repair</option>
+// 		            <option value="Home Repair">Home Repair</option>
+// 					<option value="Computer Repair">Computer Repair</option>
+// 					<option value="Phone Repair">Phone Repair</option>
+// 					<option value="Sewer Repair">Sewer Repair</option>
+// 		            <option value="HRSF72">HRSF72</option>
     return (
     <nav className="navbar navbar-default"> 
     <div className="container-fluid">
